@@ -1,5 +1,5 @@
 <template>
-    <div class="gdpr-banner">
+    <div v-if="banner" class="gdpr-banner">
         <div class="gdpr-banner__content">
             <div class="gdpr-banner__content__text">
                 <p>
@@ -7,10 +7,10 @@
                 </p>
             </div>
             <div class="gdpr-banner__content__buttons">
-                <button class="gdpr-banner__content__buttons__button" @click="accept">
+                <button class="gdpr-banner__content__buttons__button" @click="acceptGdpr">
                 {{ t('gdpr_banner.accept') }}
                 </button>
-                <button class="gdpr-banner__content__buttons__button" @click="decline">
+                <button class="gdpr-banner__content__buttons__button" @click="declineGdpr">
                 {{ t('gdpr_banner.decline') }}
                 </button>
             </div>
@@ -18,17 +18,21 @@
     </div>
 </template>
 <script setup lang="ts">
-import { useGdprLocale } from '../utils/locals'
+import { useGdprLocale } from '../composables/locals'
+import { useGdpr } from '../composables/gdpr'
+
 const { t } = useGdprLocale()
 
-const accept = () => {
-    localStorage.setItem('gdpr', 'true')
-    window.location.reload()
+const { accept, decline, banner } = useGdpr()
+
+const acceptGdpr = () => {
+    accept()
 }
-const decline = () => {
-    localStorage.setItem('gdpr', 'false')
-    window.location.reload()
+
+const declineGdpr = () => {
+    decline()
 }
+
 </script>
 <style scoped>
     .gdpr-banner {

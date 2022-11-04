@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url'
-import { defineNuxtModule, createResolver, addComponent, addImports } from '@nuxt/kit'
+import { defineNuxtModule, createResolver, addComponent, addImports, addTemplate } from '@nuxt/kit'
+import type { I18nLocales } from './runtime/composables/locals'
 
 export type ConsentRuleBanner = {
   title: string,
@@ -13,9 +14,16 @@ export interface ConsentRule {
 
 export interface ModuleOptions {
   storage: 'cookie' | 'localstorage',
-  locale: string | string[],
+/**
+  * Sets your default locale
+  */
+  defaultLocale: I18nLocales | string,
+  /**
+   * Activates locales for gdpr banner so the user can switch between them
+   */
+  locales: (string|I18nLocales)[],
   consentRules: ConsentRule[],
-  locales: Record<string, Record<string, string>>
+  defineLocales: Record<string, Record<string, string>>
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -23,14 +31,15 @@ export default defineNuxtModule<ModuleOptions>({
     name: 'nuxt-gdpr',
     configKey: 'gdpr',
     compatibility: {
-      nuxt: '^3.0.0-rc.3'
+      nuxt: '^3.0.0-rc.11'
     }
   },
   defaults: {
     storage: 'localstorage',
-    locale: 'en',
+    defaultLocale: 'en',
+    locales: [],
     consentRules: [],
-    locales: {}
+    defineLocales: {}
   },
   setup (options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
@@ -39,12 +48,34 @@ export default defineNuxtModule<ModuleOptions>({
     // Transpile runtime
     nuxt.options.build.transpile.push(runtimeDir)
     addImports([{
-      from: resolve(runtimeDir, 'composables/gdpr.ts'),
+      from: resolve(runtimeDir, 'composables','gdpr.ts'),
       name: 'useGdpr'
+    },{
+      from: resolve(runtimeDir, 'composables','locals.ts'),
+      name: 'useGdprLocals'
+    },{
+      from: resolve(runtimeDir, 'composables','locals.ts'),
+      name: 'defineGdprLocales'
     }])
     addComponent({
       name: 'GdprBanner',
-      filePath: `${resolve(runtimeDir, 'components')}/gdpr-banner.vue`
+      filePath: resolve(runtimeDir, 'components', 'gdpr-banner.vue'),
+      mode: 'client'
+    })
+    //add I18n locales
+    if(options.locales.indexOf(options.defaultLocale)===-1){
+      options.locales.push(options.defaultLocale)
+    }
+    addTemplate({
+      write: true,
+      filename: 'gdrpI18n.ts',
+      getContents() {
+        return `${options.locales.map(l => `import ${l} from '${resolve(runtimeDir, 'i18n', l)}'`).join('\n')}
+export default function registerLocals(){
+  ${options.locales.map(l => `${l}()`).join('\n')}
+}
+        `
+      }
     })
   }
 })
