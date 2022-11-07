@@ -1,16 +1,17 @@
 <template>
     <div v-if="banner" class="gdpr-banner">
         <div class="gdpr-banner__content">
+            <i18n-dropdown />
             <div class="gdpr-banner__content__text">
                 <p>
                 {{ t('gdpr_banner.text') }}
                 </p>
             </div>
             <div class="gdpr-banner__content__buttons">
-                <button class="gdpr-banner__content__buttons__button" @click="acceptGdpr">
+                <button class="gdpr-banner__content__buttons__button" @click="accept">
                 {{ t('gdpr_banner.accept') }}
                 </button>
-                <button class="gdpr-banner__content__buttons__button" @click="declineGdpr">
+                <button class="gdpr-banner__content__buttons__button" @click="decline">
                 {{ t('gdpr_banner.decline') }}
                 </button>
             </div>
@@ -18,20 +19,13 @@
     </div>
 </template>
 <script setup lang="ts">
+import I18nDropdown from './i18n-dropdown.vue'
 import { useGdprLocale } from '../composables/locals'
 import { useGdpr } from '../composables/gdpr'
 
 const { t } = useGdprLocale()
 
 const { accept, decline, banner } = useGdpr()
-
-const acceptGdpr = () => {
-    accept()
-}
-
-const declineGdpr = () => {
-    decline()
-}
 
 </script>
 <style scoped>
@@ -57,6 +51,7 @@ const declineGdpr = () => {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
     .gdpr-banner__content__text {
+        cursor: pointer;
         font-size: 1rem;
         margin-bottom: 20px;
     }
@@ -74,5 +69,4 @@ const declineGdpr = () => {
         font-size: 1.2rem;
         cursor: pointer;
     }
-
 </style>

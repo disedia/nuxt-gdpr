@@ -13,8 +13,12 @@ export interface ConsentRule {
 }
 
 export interface ModuleOptions {
-  storage: 'cookie' | 'localstorage',
-/**
+  /** 
+   * Define a timeout for the consent banner to be shown again if user has declined it.
+   * If not set, the banner will be shown on every page load.
+   * */
+  consentTimeout: number | null,
+  /**
   * Sets your default locale
   */
   defaultLocale: I18nLocales | string,
@@ -22,7 +26,13 @@ export interface ModuleOptions {
    * Activates locales for gdpr banner so the user can switch between them
    */
   locales: (string|I18nLocales)[],
+  /**
+   * Defines constent rules
+   */
   consentRules: ConsentRule[],
+  /**
+   * Defines locales for the consent banner and the consent rules
+   **/
   defineLocales: Record<string, Record<string, string>>
 }
 
@@ -35,9 +45,9 @@ export default defineNuxtModule<ModuleOptions>({
     }
   },
   defaults: {
-    storage: 'localstorage',
     defaultLocale: 'en',
     locales: [],
+    consentTimeout: null,
     consentRules: [],
     defineLocales: {}
   },

@@ -29,7 +29,8 @@
         "lint": "eslint --ext .js,.ts,.vue ."
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.12"
+        "@nuxt/kit": "^3.0.0-rc.12",
+        "@vueuse/core": "^9.4.0"
     },
     "devDependencies": {
         "eslint": "^8.25.0",

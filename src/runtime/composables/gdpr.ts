@@ -46,8 +46,8 @@ export function useGdpr(){
                 gdrpState.value.consentRequested = true
             }else{
                 gdrpState.value.consentRequested = true
-                gdrpState.value.banner = false
                 gdrpState.value.accepted = storageGdrp.accepted
+                gdrpState.value.banner = gdrpState.value.accepted ? false : true
             }
             _gdrpInitialized.value = true
         }
