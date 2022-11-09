@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'url'
+import { defu } from 'defu'
 import { defineNuxtModule, createResolver, addComponent, addImports, addTemplate } from '@nuxt/kit'
-import type { I18nLocales } from './runtime/composables/locals'
+import type { LanguageCodes } from './runtime/composables/locales'
 
 export type ConsentRuleBanner = {
   title: string,
@@ -17,23 +18,24 @@ export interface ModuleOptions {
    * Define a timeout for the consent banner to be shown again if user has declined it.
    * If not set, the banner will be shown on every page load.
    * */
-  consentTimeout: number | null,
+  consentTimeout: number | null
   /**
   * Sets your default locale
   */
-  defaultLocale: I18nLocales | string,
+  defaultLocale: LanguageCodes | string
   /**
    * Activates locales for gdpr banner so the user can switch between them
    */
-  locales: (string|I18nLocales)[],
+  locales: (string|LanguageCodes)[]
+    /**
+   * Directory where the gdpr module will look for locales
+   * Files must be named like the locale code (ISO 639-1 language codes) and can be of type .ts, .js or .json
+   **/
+  localesDir: string | null
   /**
    * Defines constent rules
    */
-  consentRules: ConsentRule[],
-  /**
-   * Defines locales for the consent banner and the consent rules
-   **/
-  defineLocales: Record<string, Record<string, string>>
+  consentRules: ConsentRule[]
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -47,13 +49,18 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: {
     defaultLocale: 'en',
     locales: [],
+    localesDir: null,
     consentTimeout: null,
-    consentRules: [],
-    defineLocales: {}
+    consentRules: []
   },
   setup (options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
+
+    nuxt.options.runtimeConfig.public.gdpr = defu(nuxt.options.runtimeConfig.public.gdpr, {
+      consentTimeout: options.consentTimeout,
+      defaultLocale: options.defaultLocale
+    })
 
     // Transpile runtime
     nuxt.options.build.transpile.push(runtimeDir)
@@ -61,11 +68,11 @@ export default defineNuxtModule<ModuleOptions>({
       from: resolve(runtimeDir, 'composables','gdpr.ts'),
       name: 'useGdpr'
     },{
-      from: resolve(runtimeDir, 'composables','locals.ts'),
+      from: resolve(runtimeDir, 'composables','locales.ts'),
       name: 'useGdprLocals'
     },{
-      from: resolve(runtimeDir, 'composables','locals.ts'),
-      name: 'defineGdprLocales'
+      from: resolve(runtimeDir, 'composables','locales.ts'),
+      name: 'defineGdprLocale'
     }])
     addComponent({
       name: 'GdprBanner',
@@ -81,8 +88,9 @@ export default defineNuxtModule<ModuleOptions>({
       filename: 'gdrpI18n.ts',
       getContents() {
         return `${options.locales.map(l => `import ${l} from '${resolve(runtimeDir, 'i18n', l)}'`).join('\n')}
-export default function registerLocals(){
+export default function registerLocales(){
   ${options.locales.map(l => `${l}()`).join('\n')}
+  return true
 }
         `
       }

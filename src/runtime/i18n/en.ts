@@ -1,9 +1,14 @@
-import { defineGdprLocales } from '#imports'
+import { defineGdprLocale } from '#imports'
 
-export default () => defineGdprLocales('en', {
-    gdpr_banner: {
-        text: 'This website uses cookies to ensure you get the best experience on our website.',
-        accept: 'Accept',
+export default () => defineGdprLocale('en', {
+    languageName: 'English',
+    dropdown: {
+        button: 'Language'
+    },
+    banner: {
+        title: 'We value your privacy',
+        text: 'We use cookies to ensure that we give you the best experience on our website. If you continue to use this site we will assume that you are happy with it.',
+        accept: 'Accept and Close',
         decline: 'Decline'
     }
 })

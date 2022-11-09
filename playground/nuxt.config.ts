@@ -9,5 +9,7 @@ export default defineNuxtConfig({
   },
   gdpr: {
     storage: 'localstorage',
+    defaultLocale: 'de',
+    locales: ['en', 'de']
   }
 })

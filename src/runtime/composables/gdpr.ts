@@ -2,12 +2,13 @@ import { useState } from '#app'
 import { onBeforeMount, computed } from 'vue'
 
 type GdprState = {
-    accepted: boolean,
-    consentRequested: boolean,
+    _initialized: boolean
+    accepted: boolean
+    consentRequested: boolean
     banner: boolean
 }
 type Storage = {
-    accepted: boolean,
+    accepted: boolean
 }
 
 const getFromStorage = () => {
@@ -26,9 +27,8 @@ const saveToStorage = (key: keyof GdprState, value: any) => {
 
 export function useGdpr(){
 
-    const _gdrpInitialized = useState<boolean>('gdpr-initialized', () => (false))
-
     const gdrpState = useState<GdprState>('gdpr', () => ({
+        _initialized: false,
         accepted: false,
         consentRequested: false,
         banner: true
@@ -39,7 +39,7 @@ export function useGdpr(){
     const consentRequested = computed(() => gdrpState.value.consentRequested)
 
     onBeforeMount(()=>{
-        if(!_gdrpInitialized.value){
+        if(!gdrpState.value._initialized){
             const storageGdrp = getFromStorage()
             if(Object.keys(storageGdrp).length === 0){
                 gdrpState.value.banner = true
@@ -49,25 +49,21 @@ export function useGdpr(){
                 gdrpState.value.accepted = storageGdrp.accepted
                 gdrpState.value.banner = gdrpState.value.accepted ? false : true
             }
-            _gdrpInitialized.value = true
+            gdrpState.value._initialized = true
         }
     })
 
     const accept = () => {
-        gdrpState.value = {
-            accepted: true,
-            consentRequested: true,
-            banner: false
-        }
+        gdrpState.value.accepted = true
+        gdrpState.value.banner = false
+        gdrpState.value.consentRequested = true
         saveToStorage('accepted', true)
     }
 
     const decline = () => {
-        gdrpState.value = {
-            accepted: false,
-            consentRequested: true,
-            banner: false
-        }
+        gdrpState.value.accepted = false
+        gdrpState.value.banner = false
+        gdrpState.value.consentRequested = true
         saveToStorage('accepted', false)
     }
 
