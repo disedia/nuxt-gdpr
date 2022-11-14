@@ -1,14 +1,14 @@
 <template>
     <div ref="dropdown" class="gdpr-banner__dropdown">
         <a @click="toggleDropdown" class="gdpr-banner__dropdown__button">
-            <span class="gdpr-banner__dropdown__button__text">{{ t('dropdown.button') }} ({{activeLanguage}})</span>
+            <span class="gdpr-banner__dropdown__button__text">{{ t('dropdown.button') }} ({{activeLocale}})</span>
             <span class="gdpr-banner__dropdown__button__icon">
                 <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 14.975q-.2 0-.387-.075q-.188-.075-.313-.2l-4.6-4.6q-.275-.275-.275-.7q0-.425.275-.7q.275-.275.7-.275q.425 0 .7.275l3.9 3.9l3.9-3.9q.275-.275.7-.275q.425 0 .7.275q.275.275.275.7q0 .425-.275.7l-4.6 4.6q-.15.15-.325.212q-.175.063-.375.063Z"/></svg>
             </span>
         </a>
         <div v-if="isDropdown" class="gdpr-banner__dropdown__content">
-            <div v-for="lang in getLanguages()" @click="changeLanguage(lang)" class="gdpr-banner__dropdown__content__item">
-                {{ lang }}
+            <div v-for="langCode in getLocales()" @click="switchLocale(langCode.code)" class="gdpr-banner__dropdown__content__item">
+                {{ langCode.name }} ({{ langCode.code }})
             </div>
         </div>
     </div>
@@ -17,9 +17,9 @@
     import { ref } from 'vue'
     import { onClickOutside } from '@vueuse/core'
     import { useGdprLocale } from '../composables/locales'
-    import type { LanguageCodes } from '../composables/locales'
+    import type { LanguageCode } from '../../types'
 
-    const { t, getLanguages, setLanguage, activeLanguage } = useGdprLocale()
+    const { t, getLocales, setLocale, activeLocale } = useGdprLocale()
 
     const isDropdown = ref(false)
     const dropdown = ref<HTMLElement | null>(null)
@@ -34,8 +34,8 @@
         isDropdown.value = !isDropdown.value
     }
 
-    const changeLanguage = (lang: LanguageCodes) => {
-        setLanguage(lang)
+    const switchLocale = async (lang: LanguageCode | string) => {
+        await setLocale(lang)
         toggleDropdown()
     }
 </script>

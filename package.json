@@ -31,7 +31,8 @@
     "dependencies": {
         "@nuxt/kit": "^3.0.0-rc.13",
         "@vueuse/core": "^9.4.0",
-        "defu": "^6.1.0"
+        "defu": "^6.1.0",
+        "typescript-cookie": "^1.0.4"
     },
     "devDependencies": {
         "eslint": "^8.25.0",

@@ -5,7 +5,7 @@
         Test
       </h1>
       <div>
-        <gdpr-banner />
+
       </div>
     </div>
   </section>

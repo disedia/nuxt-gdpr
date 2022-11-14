@@ -1,7 +1,9 @@
 import { fileURLToPath } from 'url'
 import { defu } from 'defu'
-import { defineNuxtModule, createResolver, addComponent, addImports, addTemplate } from '@nuxt/kit'
-import type { LanguageCodes } from './runtime/composables/locales'
+import { defineNuxtModule, createResolver, addComponent, addImports, extendViteConfig, addPlugin } from '@nuxt/kit'
+import { generateTemplate } from './template'
+import type { LanguageCode, Language } from './types'
+import { checkDefaults } from './utils'
 
 export type ConsentRuleBanner = {
   title: string,
@@ -22,18 +24,21 @@ export interface ModuleOptions {
   /**
   * Sets your default locale
   */
-  defaultLocale: LanguageCodes | string
+  defaultLocale: LanguageCode | string
+  /**
+   * Sets your default language
+   **/
+  fallbackLocale: LanguageCode | string
   /**
    * Activates locales for gdpr banner so the user can switch between them
    */
-  locales: (string|LanguageCodes)[]
-    /**
-   * Directory where the gdpr module will look for locales
-   * Files must be named like the locale code (ISO 639-1 language codes) and can be of type .ts, .js or .json
-   **/
-  localesDir: string | null
+  locales: Language[]
   /**
-   * Defines constent rules
+   * Directory where the gdpr module will look for consent rules and language files
+   **/
+  dir: string | null
+  /**
+   * Defines consent rules
    */
   consentRules: ConsentRule[]
 }
@@ -48,8 +53,9 @@ export default defineNuxtModule<ModuleOptions>({
   },
   defaults: {
     defaultLocale: 'en',
+    fallbackLocale: 'en',
     locales: [],
-    localesDir: null,
+    dir: 'gdpr',
     consentTimeout: null,
     consentRules: []
   },
@@ -57,9 +63,14 @@ export default defineNuxtModule<ModuleOptions>({
     const { resolve } = createResolver(import.meta.url)
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
-    nuxt.options.runtimeConfig.public.gdpr = defu(nuxt.options.runtimeConfig.public.gdpr, {
+    //add default locale if not set by user and check if everything is set correctly
+    checkDefaults(options)
+
+    nuxt.options.runtimeConfig.gdpr = defu(nuxt.options.runtimeConfig.gdpr, {
       consentTimeout: options.consentTimeout,
-      defaultLocale: options.defaultLocale
+      defaultLocale: options.defaultLocale,
+      fallbackLocale: options.fallbackLocale,
+      locales: options.locales,
     })
 
     // Transpile runtime
@@ -71,7 +82,7 @@ export default defineNuxtModule<ModuleOptions>({
       from: resolve(runtimeDir, 'composables','locales.ts'),
       name: 'useGdprLocals'
     },{
-      from: resolve(runtimeDir, 'composables','locales.ts'),
+      from: resolve(runtimeDir, 'lang','loader.ts'),
       name: 'defineGdprLocale'
     }])
     addComponent({
@@ -79,21 +90,30 @@ export default defineNuxtModule<ModuleOptions>({
       filePath: resolve(runtimeDir, 'components', 'gdpr-banner.vue'),
       mode: 'client'
     })
-    //add I18n locales
-    if(options.locales.indexOf(options.defaultLocale)===-1){
-      options.locales.push(options.defaultLocale)
-    }
-    addTemplate({
-      write: true,
-      filename: 'gdrpI18n.ts',
-      getContents() {
-        return `${options.locales.map(l => `import ${l} from '${resolve(runtimeDir, 'i18n', l)}'`).join('\n')}
-export default function registerLocales(){
-  ${options.locales.map(l => `${l}()`).join('\n')}
-  return true
-}
-        `
+    
+    //DX: transform defineGdprLocale to a function that can be imported async
+    extendViteConfig((config) => {
+      const plugin = {
+        name: 'nuxt-gdpr',
+        transform: (code, id) => {
+          if (options.locales.some(locale => id.endsWith(locale.code + '.ts'))) {
+            return code.replace('defineGdprLocale(', '() => defineGdprLocale(')
+          }
+        }
       }
+      config.plugins = config.plugins || []
+      config.plugins.unshift(plugin)
     })
+
+    generateTemplate({
+      defaultLocale: options.defaultLocale,
+      fallbackLocale: options.fallbackLocale,
+      locales: options.locales
+    })
+
+    addPlugin({
+      src: resolve(runtimeDir, 'plugins', 'gdpr.plugin.ts')
+    })
+
   }
 })
