@@ -1,7 +1,7 @@
 import { useState } from '#app'
 import { computed } from 'vue'
-import { getCookie, setCookie } from 'typescript-cookie'
 import type { GdprState } from '../../types'
+import { saveData } from '../localStorage'
 
 export function useGdpr(){
 
@@ -15,9 +15,8 @@ export function useGdpr(){
         gdrpState.value.accepted = true
         gdrpState.value.banner = false
         gdrpState.value.consentRequested = true
-        setCookie('gdpr', JSON.stringify({
-            accepted: true,
-        }))
+        saveData({accepted: true})
+        
     }
 
     const decline = () => {
@@ -25,9 +24,7 @@ export function useGdpr(){
         gdrpState.value.banner = false
         gdrpState.value.consentRequested = true
         //TODO: add consentTimeout
-        setCookie('gdpr', JSON.stringify({
-            accepted: false,
-        }))
+        saveData({accepted: false})
     }
 
     const registerConsentRule = () => {
