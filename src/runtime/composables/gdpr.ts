@@ -1,4 +1,5 @@
-import { useState } from '#app'
+import { useState, useNuxtApp } from '#app'
+import { loadConsentRule } from '#build/gdpr.loader'
 import { computed } from 'vue'
 import type { GdprState } from '../../types'
 import { saveData } from '../localStorage'
@@ -11,12 +12,17 @@ export function useGdpr(){
     const accepted = computed(() => gdrpState.value.accepted)
     const consentRequested = computed(() => gdrpState.value.consentRequested)
 
-    const accept = () => {
+    const accept = async () => {
         gdrpState.value.accepted = true
         gdrpState.value.banner = false
         gdrpState.value.consentRequested = true
+        for(const rule in gdrpState.value.consentRules){
+            const consentRule = loadConsentRule(rule)
+            if(consentRule.onAccept){
+                await consentRule.onAccept(useNuxtApp())
+            }
+        }
         saveData({accepted: true})
-        
     }
 
     const decline = () => {

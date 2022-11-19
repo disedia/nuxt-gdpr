@@ -25,11 +25,13 @@
     "scripts": {
         "build": "yarn dev:prepare && nuxt-module-build",
         "dev": "nuxi dev playground",
+        "dev:build": "nuxi build playground",
+        "dev:start": "nuxi start playground",
         "dev:prepare": "yarn nuxt-module-build --stub && nuxi prepare playground",
         "lint": "eslint --ext .js,.ts,.vue ."
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.13",
+        "@nuxt/kit": "^3.0.0",
         "@vueuse/core": "^9.4.0",
         "defu": "^6.1.0"
     },

@@ -8,13 +8,15 @@ export default defineNuxtConfig({
     configPath: '~/playground/tailwind.config.js'
   },
   gdpr: {
-    defaultLocale: 'de',
-    locales: [{
-      code: 'de',
-      name: 'Deutschdskjalkdsj',
-    },{
-      code: 'en',
-      name: 'English'
+    defaultLocale: 'en',
+    locales: ['de', {
+      name: 'Deutsch',
+      code: 'deu',
+      src: 'gdpr/i18n/deu.ts'
+    }],
+    consentRules: [{
+      name: 'ga',
+      src: 'gdpr/ga.ts'
     }]
   }
 })

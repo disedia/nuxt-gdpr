@@ -1,8 +1,8 @@
 import { useState } from '#app'
-import { registerLocale } from '#build/gdrp.loader'
+import { loadLocaleAsync } from '#build/gdpr.loader'
 import { computed } from 'vue'
 import type { Ref } from 'vue'
-import type { GdprLocaleTexts, LanguageCode, GdprState, Language } from '../../types'
+import type { GdprLocaleTexts, DefaultLanguageCode, GdprState, Language } from '../../types'
 
 
 type PathsToStringProps<T> = T extends string ? [] : {
@@ -19,30 +19,30 @@ type Join<T extends string[], D extends string> =
 type DottedLocales = Join<PathsToStringProps<GdprLocaleTexts>, ".">
 
 
-export type LocaleData = Record <LanguageCode, GdprLocaleTexts>
+export type LocaleData = Record <DefaultLanguageCode, GdprLocaleTexts>
 
 
 type UseGdprLocale = {
     t: (key: DottedLocales) => string
-    activeLocale: Ref<LanguageCode | string>
+    activeLocale: Ref<DefaultLanguageCode | string>
     getLocales: () => Language[]
-    setLocale: (languageCode: LanguageCode | string) => void
+    setLocale: (languageCode: DefaultLanguageCode | string) => void
 }
 
 export function useGdprLocale() : UseGdprLocale {
     const gdrpState = useState<GdprState>('gdpr')
 
     const activeLocale = computed(() => gdrpState.value.activeLocale)
-    const activeLocaleTexts = computed(() => gdrpState.value.texts[activeLocale.value])
+    const activeLocaleTexts = computed(() => gdrpState.value.localeTexts[activeLocale.value])
 
     const getLocales = () => {
         return gdrpState.value.locales
     }
 
-    const setLocale = async (languageCode: LanguageCode | string) => {
-        await registerLocale(languageCode).then((locale) => {
-            locale()
-        })
+    const setLocale = async (languageCode: DefaultLanguageCode | string) => {
+        if(!gdrpState.value.localeTexts[languageCode]){
+            gdrpState.value.localeTexts[languageCode] = await loadLocaleAsync(languageCode)
+        }
         gdrpState.value.activeLocale = languageCode
     }
 

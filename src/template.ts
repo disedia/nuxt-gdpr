@@ -1,27 +1,35 @@
-import { addTemplate, createResolver } from '@nuxt/kit'
-import type { LanguageCode, Language } from './types'
+import { addTemplate } from '@nuxt/kit'
+import type { GdprFiles } from './types'
 
-type GenerateTemplateOptions = {
-    defaultLocale: LanguageCode | string
-    fallbackLocale: LanguageCode | string
-    locales: Language[]
-    langDir?: string | null
-}
 
-export function generateTemplate (options: GenerateTemplateOptions) {
-    const { resolve } = createResolver(import.meta.url)
+export function generateTemplate (files: GdprFiles) {
+
     addTemplate({
         write: true,
-        filename: 'gdrp.loader.ts',
+        filename: 'gdpr.loader.ts',
         getContents() {
           return `
-export async function registerLocale(lang): Promise<() => Function> {
-    ${options.locales.map(l => `
-    if(lang === '${l.code}'){
-        return await import('${resolve('runtime/lang/defaults', l.code)}').then(module=>module?.default);
+import ${files.defaultLocale.code} from '${files.defaultLocale.src}'
+${files.consentRules.map(rule => `import ${rule.name} from '${rule.src}'`).join('\n')}
+
+export function loadDefaultLocale() {
+    return ${files.defaultLocale.code}
+}
+
+export function loadConsentRule(rule: string) {
+    ${files.consentRules.map(rule => `
+    if(rule === '${rule.name}'){
+        return ${rule.name}
     }`).join('\n')
     }
-    return await import('${resolve('runtime/lang/defaults', options.fallbackLocale)}').then(module=>module?.default);
+}
+
+export async function loadLocaleAsync(lang: string): Promise<() => Function> {
+    ${files.locales.map(l => `
+    if(lang === '${l.code}'){
+        return await import('${l.src}').then(module=>module?.default);
+    }`).join('\n')
+    }
 }`
         }
     })

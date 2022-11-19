@@ -1,7 +1,6 @@
 import { defineGdprLocale } from '#imports'
 
-export default defineGdprLocale('en', {
-    languageName: 'English',
+export default defineGdprLocale({
     dropdown: {
         button: 'Language'
     },
