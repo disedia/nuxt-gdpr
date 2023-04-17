@@ -9,8 +9,9 @@
     "preview": "nuxt preview"
   },
   "devDependencies": {
-    "nuxt": "3.0.0",
-    "@nuxtjs/tailwindcss": "^6.1.3",
-    "nuxt-gdpr": "latest"
+    "@nuxtjs/tailwindcss": "^6.6.5",
+    "nuxt": "^3.4.1",
+    "nuxt-gdpr": "latest",
+    "nuxt-texts": "^0.0.11"
   }
 }

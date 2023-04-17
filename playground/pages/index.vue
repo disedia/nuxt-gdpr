@@ -5,12 +5,12 @@
         Test
       </h1>
       <div>
-
+        {{ t('title') }}
       </div>
     </div>
   </section>
 </template>
 <script setup lang="ts">
-
+  const { t } = useTexts('gdpr')
 
 </script>

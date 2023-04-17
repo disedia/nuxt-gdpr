@@ -1,9 +1,8 @@
 <template>
   <div>
     <NuxtPage />
-    <GdprBanner />
+    <GdprBanner></GdprBanner>
   </div>
 </template>
 <script setup lang="ts">
-
 </script>

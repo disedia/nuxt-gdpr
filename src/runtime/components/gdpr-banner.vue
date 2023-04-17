@@ -5,20 +5,36 @@
                 <div></div>
                 <language-dropdown />
             </div>
-            <div class="gdpr-banner__content">
-                <div class="gdpr-banner__text">
-                    <h1 class="gdpr-banner__text__title">{{ t('banner.title') }}</h1>
-                    <p class="gdpr-banner__text__p">
-                    {{ t('banner.text') }}
-                    </p>
+            <div v-if="activeView === 'main'" class="gdpr-banner__main">
+                <div class="gdpr-banner__content">
+                    <div class="gdpr-banner__text">
+                        <h1 class="gdpr-banner__text__title">{{ t('title') }}</h1>
+                        <p class="gdpr-banner__text__p">
+                        {{ t('description') }}
+                        </p>
+                    </div>
                 </div>
+                <div class="gdpr-banner__cta">
+                    <div class="gdpr-banner__cta__link">
+                        <a @click="setView('settings')">{{ t('main.consentSettings') }}</a>
+                    </div>
+                </div>
+            </div>
+            <div v-if="activeView === 'settings'" class="gdpr-banner__settings">
+                <slot name="settings">
+                    <template v-for="consentRule of getConsentRules()">
+                        <slot name="consent-rule" :consent-rule="consentRule">
+                            <strong>{{ consentRule.name }}</strong>
+                        </slot>
+                    </template>
+                </slot>
             </div>
             <div class="gdpr-banner__footer">
                 <button class="gdpr-banner__footer__button" @click="decline">
-                    {{ t('banner.decline') }}
+                    {{ t('footer.declineButton') }}
                 </button>
                 <button class="gdpr-banner__footer__button" @click="accept">
-                {{ t('banner.accept') }}
+                {{ t('footer.acceptButton') }}
                 </button>
             </div>
         </div>
@@ -26,12 +42,18 @@
 </template>
 <script setup lang="ts">
 import LanguageDropdown from './language-dropdown.vue'
-import { useGdprLocale } from '../composables/locales'
+import { ref, useTexts } from '#imports'
 import { useGdpr } from '../composables/gdpr'
 
-const { t } = useGdprLocale()
+const { t } = useTexts('gdpr')
 
-const { accept, decline, banner } = useGdpr()
+const { accept, decline, banner, getConsentRules } = useGdpr()
+
+const activeView = ref('main')
+
+const setView = (view: 'main' | 'settings') => {
+    activeView.value = view
+}
 
 </script>
 <style scoped>
@@ -62,7 +84,6 @@ const { accept, decline, banner } = useGdpr()
     }
     .gdpr-banner__content {
         font-size: 1rem;
-        margin-bottom: 20px;
         padding: 20px;
         min-height: fit-content;
         max-height: auto;
@@ -75,6 +96,15 @@ const { accept, decline, banner } = useGdpr()
     .gdpr-banner__text__p {
         font-size: 0.9em;
         line-height: 1.25;
+    }
+    .gdpr-banner__cta{
+        padding-left: 20px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    .gdpr-banner__cta__link {
+        font-size: 0.8em;
+        text-align: left;
     }
     .gdpr-banner__footer {
         display: flex;

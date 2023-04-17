@@ -1,23 +1,20 @@
-/**
- * ISO 639-1 language codes
- */
- export type DefaultLanguageCode = 'en' | 'de'
+import type { NuxtApp } from '#app'
 
- export type Language = {
-    code: DefaultLanguageCode | string
-    name: string
-    src: string
+ type MainTexts = {
+    title: string
+    description: string
+    languageDropdown: string
+    consentSettings: string
  }
 
- type Banner = {
-     title: string
-     text: string
-     accept: string
-     decline: string
+ type FooterTexts = {
+    acceptButton: string
+    declineButton: string
  }
- 
- type Dropdown = {
-     button: string
+
+ export type GdprLocaleTexts = {
+    main: MainTexts
+    footer: FooterTexts
  }
 
  export type ConsentRuleState = {
@@ -26,10 +23,6 @@
     category?: string
  }
 
- export type GdprLocaleTexts = {
-    dropdown: Dropdown
-    banner: Banner
- }
 
 export type GdprState = {
     _initialized: boolean
@@ -37,26 +30,42 @@ export type GdprState = {
     consentRequested: boolean
     banner: boolean
     consentRules: Record<string, boolean>
-    activeLocale: DefaultLanguageCode | string
-    locales: Language[]
-    localeTexts: any
 }
 
 export type ConsentRuleBanner = {
-    title: string,
-    description: string,
+    title: string
+    description: string
 }
   
-export interface ConsentRule {
-    name: string,
-    src: string,
+export type ConsentRuleConfig = {
+    key?: string
+    name: string
+    src: string
+}
+
+type ConsentRuleTexts = {
+    title: string
+    description: string
+}
+
+export type ConsentRule = {
+    name: string
+    active?: boolean
+    mandatory?: boolean
+    category?: string
+    texts?: ConsentRuleTexts | Record<string, ConsentRuleTexts> | null
+    onServer?: (nuxtApp: NuxtApp) => Promise<void> | void
+    onAccept?: (nuxtApp: NuxtApp) => Promise<void> | void
+    onDecline?: (nuxtApp: NuxtApp) => Promise<void> | void
 }
 
 export type GdprFiles = {
     defaultLocale: Language
     locales: Language[] = []
-    consentRules: ConsentRule[] = []
+    consentRules: ConsentRuleConfig[] = []
 }
+
+export type LoadConsentRule = (key: string) => ConsentRule
 
   
 export interface ModuleOptions {
@@ -66,15 +75,9 @@ export interface ModuleOptions {
      * */
     consentTimeout: number | null
     /**
-    * Sets your default locale
-    */
-    defaultLocale: LanguageCode | string
-    /**
-     * Define locales
+     * Define consent rule dir
      */
-    locales: (Language|DefaultLanguageCode)[]
-    /**
-     * Define consent rules
-     */
-    consentRules: ConsentRule[]
+    dir: string
+
+    defaultLocale: Language
 }

@@ -1,4 +1,4 @@
-import type { GdprState } from '../types'
+import type { GdprState } from '../../types'
 import type { Ref } from 'vue'
 
 type StorageData = {

@@ -1,4 +1,3 @@
-
 export default defineConsentRule({
     name: 'Google Analytics',
     category: 'analytics',

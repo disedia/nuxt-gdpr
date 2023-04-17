@@ -1,6 +1,6 @@
 import { defineNuxtPlugin, useRuntimeConfig, useState } from '#app'
-import { loadDefaultLocale, loadConsentRule } from '#build/gdpr.loader'
-import { loadData, subscribe } from '../localStorage'
+import { loadConsentRule } from '#build/gdpr.loader'
+import { loadData, subscribe } from '../utils/localStorage'
 
 import type { GdprState } from '../../types'
 
@@ -12,21 +12,20 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         accepted: false,
         consentRequested: false,
         banner: true,
-        consentRules: {},
-        activeLocale: gdprConfig.defaultLocale,
-        locales: gdprConfig.locales,
-        localeTexts: {}
+        consentRules: {}
     }))
     // Register default locale and consent rules server side or client side if ssr is disabled
     if(process.server || (process.client && !gdrpState.value._initialized)){
         //Register default locale
-        gdrpState.value.localeTexts[gdrpState.value.activeLocale] = loadDefaultLocale()
+        //gdrpState.value.localeTexts[gdrpState.value.activeLocale] = loadDefaultLocale()
         //Register consent rules and run onServer hook
         gdprConfig.consentRules.map(async (rule: string) => {
             const consentRule = loadConsentRule(rule)
             gdrpState.value.consentRules[rule] = false
             if(process.server){
-                await consentRule.onServer(nuxtApp)
+                if(consentRule?.onServer) {
+                    await consentRule.onServer(nuxtApp)
+                }
             }
         })
         gdrpState.value._initialized = true
@@ -39,7 +38,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         if(Object.keys(data).length !== 0){
             gdrpState.value.accepted = data?.accepted || false
             gdrpState.value.consentRequested = true
-            gdrpState.value.banner = false
+            gdrpState.value.banner = data?.accepted ? false : true
             if(gdrpState.value.accepted){
                 // Run registered rules on client if consent is already given
                 for(const rule in gdrpState.value.consentRules){

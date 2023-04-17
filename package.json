@@ -5,7 +5,8 @@
     "license": "MIT",
     "type": "module",
     "workspaces": [
-        "playground"
+        "playground",
+        "docs"
     ],
     "author": {
         "name": "Johannes Hof <johannes@disedia.com>",
@@ -24,20 +25,29 @@
     ],
     "scripts": {
         "build": "yarn dev:prepare && nuxt-module-build",
-        "dev": "nuxi dev playground",
-        "dev:build": "nuxi build playground",
-        "dev:start": "nuxi start playground",
-        "dev:prepare": "yarn nuxt-module-build --stub && nuxi prepare playground",
+        "dev": "nuxt dev playground",
+        "docs": "nuxt dev docs",
+        "dev:build": "nuxt build playground",
+        "dev:start": "nuxt start playground",
+        "dev:prepare": "yarn nuxt-module-build --stub && nuxt prepare playground",
         "lint": "eslint --ext .js,.ts,.vue ."
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0",
-        "@vueuse/core": "^9.4.0",
-        "defu": "^6.1.0"
+        "@nuxt/kit": "^3.4.1",
+        "@vueuse/core": "^10.0.2"
     },
     "devDependencies": {
         "eslint": "^8.25.0",
+        "nypm": "^0.1.0",
+        "local-pkg": "^0.4.3",
+        "prompts": "^2.4.2",
+        "@types/node": "^18.15.11",
         "@nuxtjs/eslint-config-typescript": "^11.0.0",
-        "@nuxt/module-builder": "^0.1.7"
+        "@nuxt/module-builder": "^0.3.0"
+    },
+    "peerDependencies": {
+        "nuxt-texts": "^0.0.11",
+        "defu": "^6.1.2",
+        "globby": "^13.1.4"
     }
 }
