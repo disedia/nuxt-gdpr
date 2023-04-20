@@ -2,7 +2,7 @@ import { addTemplate } from '@nuxt/kit'
 import type { ConsentRuleConfig } from './types'
 
 
-export function generateTemplate (consentRules: ConsentRuleConfig[]) {
+export function createConsentRules(consentRules: ConsentRuleConfig[]) {
 
     addTemplate({
         write: true,
@@ -18,6 +18,16 @@ export function loadConsentRule(rule: string) : LoadConsentRule<ConsentRule> {
     }`).join('\n')
     }
 }`
+        }
+    })
+}
+
+export function createGdprStyles() {
+    addTemplate({
+        write: true,
+        filename: 'gdpr.styles.ts',
+        getContents() {
+            return ``;
         }
     })
 }

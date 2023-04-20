@@ -1,6 +1,6 @@
 import { defineNuxtModule, createResolver, addComponent, addImports, addPlugin, logger, installModule } from '@nuxt/kit'
 import { defu } from 'defu'
-import { generateTemplate } from './template'
+import { createConsentRules } from './template'
 import type { ModuleOptions } from './types'
 import { resolveGdprFiles } from './utils'
 import { ensurePackageInstalled } from './packages'
@@ -31,6 +31,9 @@ export default defineNuxtModule<ModuleOptions>({
   },
   async setup (options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
+
+    // Transpile runtime
+    nuxt.options.build.transpile.push(resolve('runtime'))
 
     //add hooks for dependency modules, must be called before modules are initialized
     //@ts-ignore
@@ -67,6 +70,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Handle locale defaults and resolve files
     const consentRules = await resolveGdprFiles(nuxt.options.rootDir, options)
+    //generate template to import gdpr files
+    createConsentRules(consentRules)
 
     //create runtimeConfig
     nuxt.options.runtimeConfig.gdpr = defu(nuxt.options.runtimeConfig.gdpr, {
@@ -74,18 +79,12 @@ export default defineNuxtModule<ModuleOptions>({
       consentRules: consentRules.map(rule => rule.name)
     })
 
-    // Transpile runtime
-    nuxt.options.build.transpile.push(resolve('runtime'))
-
-    //generate template to import gdpr files
-    generateTemplate(consentRules)
-
     // add auto imports
     addImports([{
-      from: resolve('runtime/composables/gdpr.ts'),
+      from: resolve('runtime/composables/useGdrp.ts'),
       name: 'useGdpr'
     },{
-      from: resolve('runtime/consentRule/loader.ts'),
+      from: resolve('runtime/defines/consentRule.ts'),
       name: 'defineConsentRule'
     }])
 

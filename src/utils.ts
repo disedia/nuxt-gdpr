@@ -13,11 +13,11 @@ export async function resolveGdprFiles(rootDir: string, options: ModuleOptions) 
         const path = file.split("/")
         // get file name without extension
         let fileName = path.pop()
-        fileName = fileName?.split('.').shift()
+        fileName = fileName?.split('.').shift() || ''
         return {
             key: fileName,
-            name: fileName?.replace(/[^a-zA-Z0-9]/g, ''),
-            src: resolve(file).split('.').shift()
+            name: fileName?.replace(/[^a-zA-Z0-9]/g, '') || '',
+            src: resolve(file).split('.').shift() || ''
         }
     })
 

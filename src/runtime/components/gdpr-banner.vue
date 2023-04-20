@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import LanguageDropdown from './language-dropdown.vue'
 import { ref, useTexts } from '#imports'
-import { useGdpr } from '../composables/gdpr'
+import { useGdpr } from '../composables/useGdpr'
 
 const { t } = useTexts('gdpr')
 
